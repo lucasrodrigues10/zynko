@@ -1,4 +1,5 @@
 using Zynko.Infrastructure.Data;
+using Zynko.Web.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,7 @@ builder.AddKeyVaultIfConfigured();
 builder.AddApplicationServices();
 builder.AddInfrastructureServices();
 builder.AddWebServices();
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -32,6 +34,8 @@ app.UseSwaggerUi(settings =>
 });
 
 app.MapRazorPages();
+
+app.MapHub<GameHub>("/hubs/game");
 
 app.MapFallbackToFile("index.html");
 
