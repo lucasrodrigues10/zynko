@@ -1,0 +1,7 @@
+﻿<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Full Stack (Frontend + Backend)" type="CompoundRunConfigurationType">
+    <toRun name="Backend API" type="LaunchSettings" />
+    <toRun name="Frontend (Angular)" type="js.build_tools.npm" />
+    <method v="2" />
+  </configuration>
+</component>
