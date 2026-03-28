@@ -5,7 +5,7 @@ Jogo de cartas adulto estilo Cards Against Humanity. Feito em português-brasile
 ## Comandos rápidos
 
 ```bash
-# Backend
+# Backend (git root: C:\Users\lucas\RiderProjects\zynko)
 cd src/Web && dotnet watch run
 
 # Frontend (em outro terminal)
