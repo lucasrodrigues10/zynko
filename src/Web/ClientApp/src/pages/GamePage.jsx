@@ -53,14 +53,19 @@ export function GamePage() {
   const isJudge = game?.players?.find(p => p.id === session?.playerId)?.isJudge ?? false;
 
   useGameHub(code, {
-    onRoundStarted: async ({ roundId, blackCardText }) => {
-      await fetchGame();
+    onRoundStarted: async () => {
+      const res = await fetch(`/api/games/${code}`);
+      if (!res.ok) return;
+      const freshGame = await res.json();
+      setGame(freshGame);
       setHasSubmitted(false);
       setJudgeSubmissions(null);
       setSubmissionProgress(null);
       setWinnerInfo(null);
-      if (!isJudge) {
-        await fetchHand(session.gameId, session.playerId);
+      const freshIsJudge = freshGame.players?.find(p => p.id === session?.playerId)?.isJudge ?? false;
+      if (!freshIsJudge && session) {
+        const handRes = await fetch(`/api/games/${session.gameId}/hand/${session.playerId}`);
+        if (handRes.ok) setHand(await handRes.json());
         setPhase('submitting');
       } else {
         setPhase('waiting');
@@ -89,7 +94,9 @@ export function GamePage() {
     const round = game.currentRound;
     if (!round) return;
     const judge = game.players.find(p => p.isJudge)?.id === session.playerId;
-    if (round.status === 0 && !judge) {
+    if (round.status === 0 && judge) {
+      setPhase('waiting');
+    } else if (round.status === 0 && !judge) {
       fetchHand(session.gameId, session.playerId);
       setPhase('submitting');
     } else if (round.status === 1 && judge) {
@@ -152,7 +159,7 @@ export function GamePage() {
             {myPlayer && (
               <span className="text-sm font-semibold text-zinc-200 truncate">{myPlayer.name}</span>
             )}
-            {isJudge && <span className="text-xs font-bold text-yellow-400 flex-shrink-0">⚖️ Juiz</span>}
+            {isNewJudge && <span className="text-xs font-bold text-yellow-400 flex-shrink-0">⚖️ Juiz</span>}
             {myPlayer && (
               <span className="text-xs text-zinc-400 flex-shrink-0 ml-auto">{myPlayer.score} pts</span>
             )}
@@ -187,7 +194,7 @@ export function GamePage() {
                 <span className="text-2xl">{getAvatar(myPlayer.id)}</span>
                 <div>
                   <p className="font-bold text-zinc-200">{myPlayer.name}</p>
-                  {isJudge && <p className="text-yellow-400 text-xs font-semibold">⚖️ Juiz desta rodada</p>}
+                  {isNewJudge && <p className="text-yellow-400 text-xs font-semibold">⚖️ Juiz desta rodada</p>}
                 </div>
               </div>
             </div>
@@ -207,13 +214,13 @@ export function GamePage() {
               scoreLimit={game.scoreLimit}
               onNext={isNewJudge || isHost ? handleNextRound : null}
             />
-          ) : isJudge && phase === 'judging' && judgeSubmissions ? (
+          ) : isNewJudge && phase === 'judging' && judgeSubmissions ? (
             <SubmissionPile
               submissions={judgeSubmissions}
               blackCardText={currentRound?.blackCardText}
               onPickWinner={handlePickWinner}
             />
-          ) : !isJudge && phase === 'submitting' && hand.length > 0 ? (
+          ) : !isNewJudge && phase === 'submitting' && hand.length > 0 ? (
             <PlayerHand
               cards={hand}
               blackCardText={currentRound?.blackCardText}
@@ -221,7 +228,7 @@ export function GamePage() {
             />
           ) : (
             <WaitingView
-              isJudge={isJudge}
+              isJudge={isNewJudge}
               hasSubmitted={hasSubmitted}
               submissionProgress={submissionProgress}
               currentRound={currentRound}
