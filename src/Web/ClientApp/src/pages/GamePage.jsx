@@ -25,6 +25,7 @@ export function GamePage() {
   const [winnerInfo, setWinnerInfo] = useState(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [phase, setPhase] = useState('waiting');
+  const [showScoreboard, setShowScoreboard] = useState(false);
 
   const fetchGame = useCallback(async () => {
     const res = await fetch(`/api/games/${code}`);
@@ -140,21 +141,47 @@ export function GamePage() {
 
   return (
     <FullLayout>
-      <div className="flex h-[calc(100vh-3.5rem)]">
-        {/* Sidebar */}
-        <aside className="w-64 flex-shrink-0 border-r border-zinc-800 p-5 flex flex-col gap-4 overflow-y-auto">
-          <div>
+      <div className="flex flex-col md:flex-row md:h-[calc(100vh-3.5rem)]">
+
+        {/* Sidebar — desktop: lateral | mobile: barra compacta + placar colapsável */}
+        <aside className="md:w-64 md:flex-shrink-0 md:border-r md:border-zinc-800 md:flex md:flex-col md:gap-4 md:p-5 md:overflow-y-auto border-b border-zinc-800">
+
+          {/* Mobile top bar */}
+          <div className="flex md:hidden items-center gap-3 px-4 py-2.5">
+            <span className="font-mono font-black text-yellow-400 text-sm flex-shrink-0">R{game.currentRoundIndex + 1}</span>
+            {myPlayer && (
+              <span className="text-sm font-semibold text-zinc-200 truncate">{myPlayer.name}</span>
+            )}
+            {isJudge && <span className="text-xs font-bold text-yellow-400 flex-shrink-0">⚖️ Juiz</span>}
+            {myPlayer && (
+              <span className="text-xs text-zinc-400 flex-shrink-0 ml-auto">{myPlayer.score} pts</span>
+            )}
+            <button
+              onClick={() => setShowScoreboard(s => !s)}
+              className="flex-shrink-0 text-xs text-zinc-400 border border-zinc-700 px-2 py-1 rounded-lg"
+            >
+              {showScoreboard ? 'Fechar' : 'Placar'}
+            </button>
+          </div>
+
+          {/* Mobile collapsible scoreboard */}
+          {showScoreboard && (
+            <div className="md:hidden px-4 pb-3">
+              <Scoreboard players={game.players} scoreLimit={game.scoreLimit} />
+            </div>
+          )}
+
+          {/* Desktop sidebar content */}
+          <div className="hidden md:block">
             <p className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-1">Sala</p>
             <p className="font-mono font-black text-yellow-400 text-lg tracking-widest">{code}</p>
           </div>
-
-          <div>
+          <div className="hidden md:block">
             <p className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-1">Rodada</p>
             <p className="font-bold text-zinc-200">{game.currentRoundIndex + 1}</p>
           </div>
-
           {myPlayer && (
-            <div>
+            <div className="hidden md:block">
               <p className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-1">Você</p>
               <div className="flex items-center gap-2">
                 <span className="text-2xl">{getAvatar(myPlayer.id)}</span>
@@ -165,14 +192,13 @@ export function GamePage() {
               </div>
             </div>
           )}
-
-          <div className="flex-1">
+          <div className="hidden md:block flex-1">
             <Scoreboard players={game.players} scoreLimit={game.scoreLimit} />
           </div>
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto p-8">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8">
           {phase === 'winner' && winnerInfo ? (
             <WinnerBanner
               playerName={winnerInfo.winnerName}

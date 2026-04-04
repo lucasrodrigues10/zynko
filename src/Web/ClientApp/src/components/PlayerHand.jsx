@@ -21,7 +21,7 @@ export function PlayerHand({ cards, blackCardText, onSubmit }) {
       {/* Hand */}
       <div>
         <p className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">Sua mão — escolha 1 carta</p>
-        <div className="grid grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {cards.map(card => (
             <WhiteCard
               key={card.id}
@@ -34,11 +34,11 @@ export function PlayerHand({ cards, blackCardText, onSubmit }) {
       </div>
 
       {/* Confirm */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <button
           onClick={() => selected !== null && onSubmit(selected)}
           disabled={selected === null}
-          className={`px-8 py-3 rounded-xl font-bold text-sm transition-colors ${
+          className={`w-full sm:w-auto px-8 py-3 rounded-xl font-bold text-sm transition-colors ${
             selected !== null
               ? 'bg-yellow-400 text-black hover:bg-yellow-300'
               : 'bg-zinc-800 text-zinc-600 cursor-not-allowed border border-zinc-700'

@@ -101,7 +101,7 @@ export function LobbyPage() {
           <p className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-4">
             Jogadores ({game.players.length})
           </p>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {game.players.map(p => (
               <div key={p.id} className="flex items-center gap-3 bg-zinc-800 rounded-xl px-4 py-3">
                 <div className="w-9 h-9 bg-zinc-700 rounded-full flex items-center justify-center text-xl flex-shrink-0">

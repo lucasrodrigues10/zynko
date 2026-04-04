@@ -23,7 +23,7 @@ export function SubmissionPile({ submissions, blackCardText, onPickWinner }) {
         <p className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">
           ⚖️ Escolha a melhor resposta
         </p>
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {submissions.map(s => (
             <WhiteCard
               key={s.id}
@@ -36,11 +36,11 @@ export function SubmissionPile({ submissions, blackCardText, onPickWinner }) {
       </div>
 
       {/* Confirm */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <button
           onClick={() => selected !== null && onPickWinner(selected)}
           disabled={selected === null}
-          className={`px-8 py-3 rounded-xl font-bold text-sm transition-colors ${
+          className={`w-full sm:w-auto px-8 py-3 rounded-xl font-bold text-sm transition-colors ${
             selected !== null
               ? 'bg-yellow-400 text-black hover:bg-yellow-300'
               : 'bg-zinc-800 text-zinc-600 cursor-not-allowed border border-zinc-700'

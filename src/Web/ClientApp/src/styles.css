@@ -7,6 +7,15 @@
 html {
   font-size: 16px;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+button, a, [role="button"] {
+  touch-action: manipulation;
+}
+
+input, textarea, select {
+  font-size: 16px; /* evita zoom automático no mobile */
 }
 
 body {
