@@ -15,6 +15,8 @@ public interface IGameNotifier
     Task RoundFinished(string gameCode, int winnerPlayerId, string winnerName, string whiteCardText, IEnumerable<PlayerScoreNotification> scores, CancellationToken cancellationToken = default);
 
     Task GameFinished(string gameCode, IEnumerable<PlayerScoreNotification> scores, CancellationToken cancellationToken = default);
+
+    Task PlayerLeft(string gameCode, int playerId, CancellationToken cancellationToken = default);
 }
 
 public record SubmissionNotification(int Id, string WhiteCardText);

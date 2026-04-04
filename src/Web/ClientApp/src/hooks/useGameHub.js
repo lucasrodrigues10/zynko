@@ -22,6 +22,7 @@ export function useGameHub(gameCode, handlers) {
     connection.on('JudgingPhase', (submissions) => handlersRef.current.onJudgingPhase?.(submissions));
     connection.on('RoundFinished', (data) => handlersRef.current.onRoundFinished?.(data));
     connection.on('GameFinished', (data) => handlersRef.current.onGameFinished?.(data));
+    connection.on('PlayerLeft', (data) => handlersRef.current.onPlayerLeft?.(data));
 
     connectionRef.current = connection;
 

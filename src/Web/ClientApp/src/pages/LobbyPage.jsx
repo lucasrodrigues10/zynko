@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGameHub } from '../hooks/useGameHub';
 import { Layout } from '../components/Layout';
+import { getAvatar } from '../components/AvatarPicker';
 
 export function LobbyPage() {
   const { code } = useParams();
@@ -11,7 +12,6 @@ export function LobbyPage() {
   const [game, setGame] = useState(null);
   const [error, setError] = useState(null);
   const [starting, setStarting] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const fetchGame = async () => {
     const res = await fetch(`/api/games/${code}`);
@@ -21,8 +21,20 @@ export function LobbyPage() {
 
   useEffect(() => { fetchGame(); }, [code]);
 
+  useEffect(() => {
+    if (!session) return;
+    const leaveUrl = `/api/games/${code}/leave/${session.playerId}`;
+    const onUnload = () => navigator.sendBeacon(leaveUrl);
+    window.addEventListener('beforeunload', onUnload);
+    return () => {
+      window.removeEventListener('beforeunload', onUnload);
+      fetch(leaveUrl, { method: 'POST' }).catch(() => {});
+    };
+  }, [code, session?.playerId]);
+
   useGameHub(code, {
     onPlayerJoined: () => fetchGame(),
+    onPlayerLeft: () => fetchGame(),
     onGameStarted: () => navigate(`/game/${code}`),
   });
 
@@ -43,12 +55,6 @@ export function LobbyPage() {
       setError(d?.title || 'Erro ao iniciar.');
       setStarting(false);
     }
-  };
-
-  const copyCode = () => {
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   if (error) return (
@@ -72,37 +78,20 @@ export function LobbyPage() {
       <div className="max-w-2xl mx-auto py-6">
         <h1 className="text-2xl font-black mb-6">Sala de espera</h1>
 
-        <div className="grid grid-cols-2 gap-5 mb-5">
-          {/* Code */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-            <p className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">Código da sala</p>
-            <button onClick={copyCode} className="block w-full text-left group">
-              <span className="text-4xl font-black font-mono tracking-widest text-yellow-400 block">{code}</span>
-              <span className="text-xs text-zinc-600 group-hover:text-zinc-400 transition-colors mt-1 block">
-                {copied ? '✓ Copiado!' : 'Clique para copiar'}
-              </span>
-            </button>
-            <p className="text-zinc-600 text-xs mt-3 leading-relaxed">
-              Compartilhe com os outros jogadores
-            </p>
-          </div>
-
-          {/* Settings */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-            <p className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">Configurações</p>
-            <div className="space-y-2.5 text-sm">
-              <div className="flex justify-between items-center">
-                <span className="text-zinc-400">Pontos para vencer</span>
-                <span className="font-bold text-yellow-400">{game.scoreLimit}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-zinc-400">Jogadores</span>
-                <span className="font-bold">{game.players.length} / 12</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-zinc-400">Host</span>
-                <span className="font-bold truncate ml-2">{game.players.find(p => p.id === game.hostPlayerId)?.name}</span>
-              </div>
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-5">
+          <p className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">Configurações</p>
+          <div className="flex gap-8 text-sm">
+            <div className="flex justify-between items-center gap-2">
+              <span className="text-zinc-400">Pontos para vencer</span>
+              <span className="font-bold text-yellow-400">{game.scoreLimit}</span>
+            </div>
+            <div className="flex justify-between items-center gap-2">
+              <span className="text-zinc-400">Jogadores</span>
+              <span className="font-bold">{game.players.length} / 12</span>
+            </div>
+            <div className="flex justify-between items-center gap-2">
+              <span className="text-zinc-400">Host</span>
+              <span className="font-bold">{game.players.find(p => p.id === game.hostPlayerId)?.name}</span>
             </div>
           </div>
         </div>
@@ -115,8 +104,8 @@ export function LobbyPage() {
           <div className="grid grid-cols-3 gap-3">
             {game.players.map(p => (
               <div key={p.id} className="flex items-center gap-3 bg-zinc-800 rounded-xl px-4 py-3">
-                <div className="w-8 h-8 bg-yellow-400/15 text-yellow-400 rounded-full flex items-center justify-center font-black text-sm flex-shrink-0">
-                  {p.name[0].toUpperCase()}
+                <div className="w-9 h-9 bg-zinc-700 rounded-full flex items-center justify-center text-xl flex-shrink-0">
+                  {getAvatar(p.id)}
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold text-sm truncate">{p.name}</p>

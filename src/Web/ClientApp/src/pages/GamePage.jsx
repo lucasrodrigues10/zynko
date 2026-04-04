@@ -6,6 +6,7 @@ import { SubmissionPile } from '../components/SubmissionPile';
 import { Scoreboard } from '../components/Scoreboard';
 import { WinnerBanner } from '../components/WinnerBanner';
 import { FullLayout } from '../components/Layout';
+import { getAvatar } from '../components/AvatarPicker';
 
 function getSession(code) {
   try { return JSON.parse(localStorage.getItem(`zynko_${code}`)); }
@@ -36,6 +37,17 @@ export function GamePage() {
   }, []);
 
   useEffect(() => { fetchGame(); }, [fetchGame]);
+
+  useEffect(() => {
+    if (!session) return;
+    const leaveUrl = `/api/games/${code}/leave/${session.playerId}`;
+    const onUnload = () => navigator.sendBeacon(leaveUrl);
+    window.addEventListener('beforeunload', onUnload);
+    return () => {
+      window.removeEventListener('beforeunload', onUnload);
+      fetch(leaveUrl, { method: 'POST' }).catch(() => {});
+    };
+  }, [code, session?.playerId]);
 
   const isJudge = game?.players?.find(p => p.id === session?.playerId)?.isJudge ?? false;
 
@@ -144,8 +156,13 @@ export function GamePage() {
           {myPlayer && (
             <div>
               <p className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-1">Você</p>
-              <p className="font-bold text-zinc-200">{myPlayer.name}</p>
-              {isJudge && <p className="text-yellow-400 text-xs font-semibold mt-0.5">⚖️ Juiz desta rodada</p>}
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">{getAvatar(myPlayer.id)}</span>
+                <div>
+                  <p className="font-bold text-zinc-200">{myPlayer.name}</p>
+                  {isJudge && <p className="text-yellow-400 text-xs font-semibold">⚖️ Juiz desta rodada</p>}
+                </div>
+              </div>
             </div>
           )}
 

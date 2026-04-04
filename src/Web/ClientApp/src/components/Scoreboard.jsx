@@ -1,3 +1,5 @@
+import { getAvatar } from './AvatarPicker';
+
 export function Scoreboard({ players, scoreLimit }) {
   const sorted = [...players].sort((a, b) => b.score - a.score);
   return (
@@ -6,6 +8,7 @@ export function Scoreboard({ players, scoreLimit }) {
       <ul className="space-y-2.5">
         {sorted.map(p => (
           <li key={p.id} className="flex items-center gap-2">
+            <span className="text-base leading-none flex-shrink-0">{getAvatar(p.id)}</span>
             {p.isJudge && <span className="text-xs" title="Juiz">⚖️</span>}
             <span className={`text-sm font-semibold truncate flex-1 ${p.isJudge ? 'text-yellow-400' : 'text-zinc-200'}`}>
               {p.name}

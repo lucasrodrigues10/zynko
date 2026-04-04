@@ -40,6 +40,12 @@ public class ProblemDetailsExceptionHandler : IExceptionHandler
                 Title = "Forbidden",
                 Type = "https://tools.ietf.org/html/rfc9110#section-15.5.4"
             }),
+            InvalidOperationException ioe => (StatusCodes.Status422UnprocessableEntity, new ProblemDetails
+            {
+                Status = StatusCodes.Status422UnprocessableEntity,
+                Title = "Operação inválida.",
+                Detail = ioe.Message
+            }),
             _ => (-1, null)
         };
 

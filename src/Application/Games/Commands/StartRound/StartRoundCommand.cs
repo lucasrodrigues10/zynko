@@ -50,7 +50,7 @@ public class StartRoundCommandHandler : IRequestHandler<StartRoundCommand>
         game.CurrentRoundIndex++;
         await _context.SaveChangesAsync(cancellationToken);
 
-        // Fill hands back to 5
+        // Fill hands back to 10
         await DealHands(game, cancellationToken);
 
         await _notifier.RoundStarted(game.Code, round.Id, blackCard.Text, cancellationToken);
@@ -70,7 +70,7 @@ public class StartRoundCommandHandler : IRequestHandler<StartRoundCommand>
             var currentHandCount = await _context.PlayerCards
                 .CountAsync(pc => pc.PlayerId == player.Id && pc.GameId == game.Id, cancellationToken);
 
-            var needed = 5 - currentHandCount;
+            var needed = 10 - currentHandCount;
             if (needed <= 0) continue;
 
             var newCards = await _context.Cards

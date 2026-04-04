@@ -8,6 +8,8 @@ public record CreateGameCommand : IRequest<CreateGameResult>
 {
     public string HostName { get; init; } = string.Empty;
 
+    public string RoomName { get; init; } = string.Empty;
+
     public int ScoreLimit { get; init; } = 5;
 }
 
@@ -24,11 +26,18 @@ public class CreateGameCommandHandler : IRequestHandler<CreateGameCommand, Creat
 
     public async Task<CreateGameResult> Handle(CreateGameCommand request, CancellationToken cancellationToken)
     {
+        var nameInUse = await _context.Games
+            .AnyAsync(g => g.Name == request.RoomName && g.Status != GameStatus.Finished, cancellationToken);
+
+        if (nameInUse)
+            throw new InvalidOperationException($"Já existe uma sala com o nome '{request.RoomName}'.");
+
         var host = new Player { Name = request.HostName };
 
         var game = new Game
         {
             Code = GenerateCode(),
+            Name = request.RoomName,
             Status = GameStatus.WaitingForPlayers,
             CreatedAt = DateTimeOffset.UtcNow,
             ScoreLimit = request.ScoreLimit,

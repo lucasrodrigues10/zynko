@@ -7,6 +7,8 @@ public class Game : BaseEntity
 {
     public string Code { get; set; } = string.Empty;
 
+    public string Name { get; set; } = string.Empty;
+
     public GameStatus Status { get; set; } = GameStatus.WaitingForPlayers;
 
     public DateTimeOffset CreatedAt { get; set; }

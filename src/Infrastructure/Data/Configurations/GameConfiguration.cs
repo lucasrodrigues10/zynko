@@ -12,6 +12,9 @@ public class GameConfiguration : IEntityTypeConfiguration<Game>
             .HasMaxLength(6)
             .IsRequired();
 
+        builder.Property(g => g.Name)
+            .HasMaxLength(100);
+
         builder.HasIndex(g => g.Code).IsUnique();
 
         builder.HasMany(g => g.Players)

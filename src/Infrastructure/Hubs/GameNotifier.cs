@@ -32,4 +32,7 @@ public class GameNotifier : IGameNotifier
 
     public Task GameFinished(string gameCode, IEnumerable<PlayerScoreNotification> scores, CancellationToken cancellationToken = default)
         => _hub.Clients.Group(gameCode).SendAsync("GameFinished", new { scores }, cancellationToken);
+
+    public Task PlayerLeft(string gameCode, int playerId, CancellationToken cancellationToken = default)
+        => _hub.Clients.Group(gameCode).SendAsync("PlayerLeft", new { playerId }, cancellationToken);
 }

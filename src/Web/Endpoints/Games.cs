@@ -1,11 +1,13 @@
 using Zynko.Application.Games.Commands.CreateGame;
 using Zynko.Application.Games.Commands.JoinGame;
+using Zynko.Application.Games.Commands.LeaveGame;
 using Zynko.Application.Games.Commands.PickWinner;
 using Zynko.Application.Games.Commands.StartGame;
 using Zynko.Application.Games.Commands.StartRound;
 using Zynko.Application.Games.Commands.SubmitCard;
 using Zynko.Application.Games.Queries.GetGame;
 using Zynko.Application.Games.Queries.GetPlayerHand;
+using Zynko.Application.Games.Queries.ListOpenGames;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Zynko.Web.Endpoints;
@@ -14,14 +16,23 @@ public class Games : IEndpointGroup
 {
     public static void Map(RouteGroupBuilder groupBuilder)
     {
+        groupBuilder.MapGet(ListOpenGames, "open");
         groupBuilder.MapPost(CreateGame);
         groupBuilder.MapPost(JoinGame, "{code}/join");
+        groupBuilder.MapPost(LeaveGame, "{code}/leave/{playerId}");
         groupBuilder.MapPost(StartGame, "{id}/start");
         groupBuilder.MapGet(GetGame, "{code}");
         groupBuilder.MapGet(GetPlayerHand, "{id}/hand/{playerId}");
         groupBuilder.MapPost(StartRound, "{id}/rounds/start");
         groupBuilder.MapPost(SubmitCard, "{id}/rounds/{roundId}/submit");
         groupBuilder.MapPost(PickWinner, "{id}/rounds/{roundId}/winner");
+    }
+
+    [EndpointSummary("Listar salas abertas")]
+    public static async Task<Ok<IList<OpenGameVm>>> ListOpenGames(ISender sender)
+    {
+        var result = await sender.Send(new ListOpenGamesQuery());
+        return TypedResults.Ok(result);
     }
 
     [EndpointSummary("Criar partida")]
@@ -36,6 +47,13 @@ public class Games : IEndpointGroup
     {
         var result = await sender.Send(command with { GameCode = code });
         return TypedResults.Ok(result);
+    }
+
+    [EndpointSummary("Sair da sala")]
+    public static async Task<NoContent> LeaveGame(ISender sender, string code, int playerId)
+    {
+        await sender.Send(new LeaveGameCommand { GameCode = code, PlayerId = playerId });
+        return TypedResults.NoContent();
     }
 
     [EndpointSummary("Host inicia o jogo")]
