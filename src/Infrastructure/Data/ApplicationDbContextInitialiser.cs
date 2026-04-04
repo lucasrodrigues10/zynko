@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Zynko.Domain.Constants;
 using Zynko.Domain.Entities;
 using Zynko.Domain.Enums;
@@ -41,13 +42,37 @@ public class ApplicationDbContextInitialiser
     {
         try
         {
-            await _context.Database.EnsureDeletedAsync();
             await _context.Database.EnsureCreatedAsync();
+            await ApplySchemaUpdatesAsync();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred while initialising the database.");
             throw;
+        }
+    }
+
+    private async Task ApplySchemaUpdatesAsync()
+    {
+        var conn = _context.Database.GetDbConnection();
+        await conn.OpenAsync();
+        try
+        {
+            // Add Name column to Games if it doesn't exist yet
+            using var checkCmd = conn.CreateCommand();
+            checkCmd.CommandText = "SELECT COUNT(*) FROM pragma_table_info('Games') WHERE name='Name'";
+            var exists = (long)(await checkCmd.ExecuteScalarAsync())! > 0;
+            if (!exists)
+            {
+                using var alterCmd = conn.CreateCommand();
+                alterCmd.CommandText = "ALTER TABLE Games ADD COLUMN Name TEXT NOT NULL DEFAULT ''";
+                await alterCmd.ExecuteNonQueryAsync();
+                _logger.LogInformation("Applied schema update: added Games.Name column.");
+            }
+        }
+        finally
+        {
+            await conn.CloseAsync();
         }
     }
 
