@@ -97,8 +97,7 @@ export function GamePage() {
     if (round.status === 0 && judge) {
       setPhase('waiting');
     } else if (round.status === 0 && !judge) {
-      fetchHand(session.gameId, session.playerId);
-      setPhase('submitting');
+      fetchHand(session.gameId, session.playerId).then(() => setPhase('submitting'));
     } else if (round.status === 1 && judge) {
       setPhase('judging');
     }
@@ -220,7 +219,7 @@ export function GamePage() {
               blackCardText={currentRound?.blackCardText}
               onPickWinner={handlePickWinner}
             />
-          ) : !isNewJudge && phase === 'submitting' && hand.length > 0 ? (
+          ) : !isNewJudge && phase === 'submitting' ? (
             <PlayerHand
               cards={hand}
               blackCardText={currentRound?.blackCardText}

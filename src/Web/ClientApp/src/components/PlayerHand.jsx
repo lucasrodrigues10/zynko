@@ -21,6 +21,9 @@ export function PlayerHand({ cards, blackCardText, onSubmit }) {
       {/* Hand */}
       <div>
         <p className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">Sua mão — escolha 1 carta</p>
+        {cards.length === 0 ? (
+          <p className="text-zinc-500 text-sm animate-pulse">Carregando suas cartas...</p>
+        ) : null}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {cards.map(card => (
             <WhiteCard
